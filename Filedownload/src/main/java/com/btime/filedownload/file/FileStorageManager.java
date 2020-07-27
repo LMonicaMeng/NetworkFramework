@@ -25,7 +25,7 @@ public class FileStorageManager {
         this.mContext = context;
     }
 
-    public File getFileByNames(String url) {
+    public File getFileByName(String url) {
         File parent;
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             parent = mContext.getExternalCacheDir();
