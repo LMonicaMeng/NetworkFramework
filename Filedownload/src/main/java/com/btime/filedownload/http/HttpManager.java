@@ -20,8 +20,9 @@ import okhttp3.Response;
  */
 public class HttpManager {
 
-    public static final HttpManager sManager = new HttpManager();
-    private static final int NETWORK_CODE = 1;
+    private static final HttpManager sManager = new HttpManager();
+    public static final int NETWORK_CODE = 1;
+    public static final int CONTENT_LENGTH_ERROR_CODE = 2;
 
     private Context mContext;
 
@@ -56,6 +57,25 @@ public class HttpManager {
     }
 
     /**
+     * 同步请求
+     *
+     * @param url
+     * @return
+     */
+    public Response syncRequestByRange(String url,long start,long end) {
+        Request request = new Request.Builder().url(url)
+                .addHeader("Range","bytes="+start+"-"+end)
+                .build();
+        try {
+            return mClient.newCall(request).execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+    /**
      * 异步请求
      *
      * @param url
@@ -84,10 +104,13 @@ public class HttpManager {
                     fileOut.write(buffer,0,len);
                     fileOut.flush();
                 }
-                assert callback != null;
                 callback.success(file);
             }
         });
     }
 
+    public void asyncRequest(String url,Callback callback){
+        Request request = new Request.Builder().url(url).build();
+        mClient.newCall(request).enqueue(callback);
+    }
 }

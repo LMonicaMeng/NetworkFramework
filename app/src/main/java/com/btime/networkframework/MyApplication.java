@@ -3,6 +3,7 @@ package com.btime.networkframework;
 import android.app.Application;
 
 import com.btime.filedownload.file.FileStorageManager;
+import com.btime.filedownload.http.DownloadManager;
 import com.btime.filedownload.http.HttpManager;
 
 public class MyApplication extends Application {
