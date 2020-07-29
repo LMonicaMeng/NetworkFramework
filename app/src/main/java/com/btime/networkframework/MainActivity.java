@@ -2,8 +2,10 @@ package com.btime.networkframework;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -18,6 +20,8 @@ import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
     private ImageView imageView;
+
+    private int count;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,9 +54,14 @@ public class MainActivity extends AppCompatActivity {
 //
 //            }
 //        });
-        DownloadManager.getInstance().download("https://img2.mukewang.com/szimg/5edf24fd081fde7906000338-360-202.jpg", new DownloadCallback() {
+        String url = "https://img2.mukewang.com/szimg/5efe95290836b53006000338-360-202.jpg";
+        DownloadManager.getInstance().download(url, new DownloadCallback() {
             @Override
             public void success(File file) {
+                if(count<1){
+                    count ++;
+                    return;
+                }
                 final Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
                 runOnUiThread(new Runnable() {
                     @Override
@@ -73,5 +82,12 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void installApk(File file){
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setDataAndType(Uri.parse("file://"+file.getAbsoluteFile().toString()),"application/vnd.android.package-archive");
+        MainActivity.this.startActivity(intent);
     }
 }
