@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.btime.filedownload.file.FileStorageManager;
 import com.btime.filedownload.http.DownloadCallback;
@@ -20,6 +21,7 @@ import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
     private ImageView imageView;
+    private ProgressBar mProgressBar;
 
     private int count;
 
@@ -28,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         imageView = findViewById(R.id.image);
+        mProgressBar = findViewById(R.id.progress);
+
         File file = FileStorageManager.getInstance().getFileByName("http://www.imooc.com");
         Logger.debug("nate", "file path = " + file.getAbsoluteFile());
 
@@ -79,7 +83,8 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void progress(int progress) {
-
+                Logger.debug("nate", "progress  " + progress);
+                mProgressBar.setProgress(progress);
             }
         });
     }
