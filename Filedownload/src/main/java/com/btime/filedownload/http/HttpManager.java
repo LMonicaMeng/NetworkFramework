@@ -23,6 +23,7 @@ public class HttpManager {
     private static final HttpManager sManager = new HttpManager();
     public static final int NETWORK_CODE = 1;
     public static final int CONTENT_LENGTH_ERROR_CODE = 2;
+    public static final int TASK_RUNNING_ERROR_CODE = 2;
 
     private Context mContext;
 
