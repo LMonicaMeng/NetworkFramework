@@ -1,5 +1,6 @@
 package com.btime.filedownload.http;
 
+import com.btime.filedownload.DownloadConfig;
 import com.btime.filedownload.DownloadTask;
 import com.btime.filedownload.db.DownloadEntity;
 import com.btime.filedownload.db.DownloadHelper;
@@ -23,14 +24,15 @@ import okhttp3.Callback;
 import okhttp3.Response;
 
 public class DownloadManager {
-    private final static int MAX_THREAD = 2;
+    public final static int MAX_THREAD = 2;
+    public final static int LOCAL_PROGRESS_SIZE = 1;
     private static final DownloadManager sManager = new DownloadManager();
-    public static final ExecutorService SLOCAL_PROGRESS = Executors.newFixedThreadPool(1);
+    public static ExecutorService sLocalProgressPool = Executors.newFixedThreadPool(1);
     private List<DownloadEntity> mCache;
     private HashSet<DownloadTask> mHashSet = new HashSet<>();
     private long mLength;
 
-    private static final ThreadPoolExecutor sThreadPool = new ThreadPoolExecutor(MAX_THREAD, MAX_THREAD, 60, TimeUnit.MILLISECONDS, new SynchronousQueue<Runnable>(), new ThreadFactory() {
+    private static ThreadPoolExecutor sThreadPool = new ThreadPoolExecutor(MAX_THREAD, MAX_THREAD, 60, TimeUnit.MILLISECONDS, new SynchronousQueue<Runnable>(), new ThreadFactory() {
         private AtomicInteger mInteger = new AtomicInteger();
 
         @Override
@@ -46,6 +48,19 @@ public class DownloadManager {
 
     private DownloadManager() {
 
+    }
+
+    public void init(DownloadConfig config){
+        sThreadPool = new ThreadPoolExecutor(config.getCoreThreadSize(), config.getMaxThreadSize(), 60, TimeUnit.MILLISECONDS, new SynchronousQueue<Runnable>(), new ThreadFactory() {
+            private AtomicInteger mInteger = new AtomicInteger();
+
+            @Override
+            public Thread newThread(Runnable runnable) {
+                Thread thread = new Thread(runnable, "download thread #" + mInteger.getAndIncrement());
+                return thread;
+            }
+        });
+        sLocalProgressPool = Executors.newFixedThreadPool(config.getLocalProgressThreadSize());
     }
 
     private void finish(DownloadTask task) {
@@ -97,7 +112,7 @@ public class DownloadManager {
                 long endSize = entity.getEnd_position();
                 sThreadPool.execute(new DownloadRunnable(startSize, endSize, url, callback, entity));
             }
-            SLOCAL_PROGRESS.execute(new Runnable() {
+            sLocalProgressPool.execute(new Runnable() {
                 @Override
                 public void run() {
                     while (true) {
